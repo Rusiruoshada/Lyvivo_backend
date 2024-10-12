@@ -1,0 +1,13 @@
+{
+  "type": "postgres",  
+  "host": "localhost",
+  "port": 5432,
+  "username": "roms",
+  "password": "roms1@Roms",
+  "database": "lyvivo",
+  "synchronize": true,
+  "logging": true,
+  "entities": ["src/postgres/entity/*.ts"],
+  "migrations": ["src/postgres/migration/*.ts"],
+  "subscribers": ["src/postgres/subscriber/*.ts"]
+}

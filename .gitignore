@@ -1,17 +1,18 @@
-# API keys and secrets
-.env
+/node_modules
+/dist
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
 
-# Dependency directory
-node_modules
-
-# Editors
-.idea
-*.iml
-.vscode/settings.json
-
-# OS metadata
+# System Files
 .DS_Store
 Thumbs.db
 
-# Ignore built ts files
-dist/**/*
+# Config  
+conf/env.json
+.env*
