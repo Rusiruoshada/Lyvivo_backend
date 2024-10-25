@@ -72,7 +72,7 @@ export const registerUser = async (
 
   const userRepository = AppDataSource.getRepository(User);
   const existingUser = await userRepository.findOneBy({ email });
-
+  
   if (existingUser) {
     return res.status(403).json({ message: "User already exists." });
   }
@@ -103,5 +103,9 @@ export const registerUser = async (
 };
 
 export const login = (req: Request, res: Response) => {
-    
+    const {username:email, password} = req.body;
+
+    const getRepository = AppDataSource.getRepository(User);
+    const isUserExist = getRepository.findOneBy({ email });
+
 }
