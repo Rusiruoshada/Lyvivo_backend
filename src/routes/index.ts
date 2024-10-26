@@ -9,4 +9,6 @@ router.get("/api/homepageProduct", controller.homepageProduct);
 
 router.get("/api/product/:id", controller.productID);
 
-router.post("/api/register", controller.registerUser)
+router.post("/api/register", controller.registerUser);
+
+router.post('/api/login', controller.login);
