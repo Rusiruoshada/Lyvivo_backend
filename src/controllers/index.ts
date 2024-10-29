@@ -102,10 +102,16 @@ export const registerUser = async (
   }
 };
 
-export const login = (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
     const {username:email, password} = req.body;
 
     const getRepository = AppDataSource.getRepository(User);
-    const isUserExist = getRepository.findOneBy({ email });
+  const isUserExist = await getRepository.findOneBy({ email });
+  
+  if (!isUserExist) {
+    return res.status(201).json({message:'Invalid email or password!'})
+  }
+
+  
 
 }
