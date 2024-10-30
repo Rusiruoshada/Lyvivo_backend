@@ -3,6 +3,7 @@ import Product from "../mongoDB/models/product";
 import { User } from "../postgres/entity/User";
 import { AppDataSource } from "../postgres/database";
 import bcrypt from "bcryptjs";
+
 /**
  * GET /
  * Home page.
@@ -93,7 +94,7 @@ export const registerUser = async (
     password: hashedPassword,
   });
 
-  try {
+  try {   
     await userRepository.save(user);
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
@@ -102,16 +103,18 @@ export const registerUser = async (
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-    const {username:email, password} = req.body;
+export const login = async (req: Request, res: Response): Promise<any> => {
+  const {username:email, password} = req.body;
 
-    const getRepository = AppDataSource.getRepository(User);
+  const getRepository = AppDataSource.getRepository(User);
   const isUserExist = await getRepository.findOneBy({ email });
-  
-  if (!isUserExist) {
-    return res.status(201).json({message:'Invalid email or password!'})
-  }
+  console.log("in login api"+ email,password, isUserExist)
 
+  if (!isUserExist) {
+    console.log('in isUserExist')
+    return res.status(403).json({message:'Invalid email or password!'})
+  }
   
+
 
 }
