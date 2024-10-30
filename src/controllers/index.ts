@@ -106,15 +106,17 @@ export const registerUser = async (
 export const login = async (req: Request, res: Response): Promise<any> => {
   const {username:email, password} = req.body;
 
+  const emailTrimmed = email.trim().toLowercase();
+
   const getRepository = AppDataSource.getRepository(User);
-  const isUserExist = await getRepository.findOneBy({ email });
+  const isUserExist = await getRepository.findOneBy({ email:emailTrimmed });
   console.log("in login api"+ email,password, isUserExist)
 
   if (!isUserExist) {
     console.log('in isUserExist')
     return res.status(403).json({message:'Invalid email or password!'})
   }
-  
+
 
 
 }
