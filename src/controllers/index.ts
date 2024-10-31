@@ -71,8 +71,10 @@ export const registerUser = async (
     confirmPassword,
   } = req.body;
 
+  const trimmedEmail = email.trim().toLowerCase();
+
   const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email });
+  const existingUser = await userRepository.findOneBy({ email:trimmedEmail });
   
   if (existingUser) {
     return res.status(403).json({ message: "User already exists." });
@@ -106,15 +108,15 @@ export const registerUser = async (
 export const login = async (req: Request, res: Response): Promise<any> => {
   const {username:email, password} = req.body;
 
-  const emailTrimmed = email.trim().toLowercase();
+  const emailTrimmed = email.trim().toLowerCase();
 
-  const getRepository = AppDataSource.getRepository(User);
-  const isUserExist = await getRepository.findOneBy({ email:emailTrimmed });
-  console.log("in login api"+ email,password, isUserExist)
+  const userRepository = AppDataSource.getRepository(User);
+  const existingUser = await userRepository.findOneBy({ email });;
+  console.log("in login api", email, password, existingUser);
 
-  if (!isUserExist) {
-    console.log('in isUserExist')
-    return res.status(403).json({message:'Invalid email or password!'})
+  if (!existingUser) {
+    console.log("in isUserExist");
+    return res.status(403).json({ message: "Invalid email or password!" });
   }
 
 
