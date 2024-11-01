@@ -3,7 +3,9 @@ import Product from "../mongoDB/models/product";
 import { User } from "../postgres/entity/User";
 import { AppDataSource } from "../postgres/database";
 import bcrypt from "bcryptjs";
+import jwt  from "jsonwebtoken";
 
+import '../config/dotenv';
 /**
  * GET /
  * Home page.
@@ -111,14 +113,18 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   const emailTrimmed = email.trim().toLowerCase();
 
   const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email });;
-  console.log("in login api", email, password, existingUser);
-
+  const existingUser = await userRepository.findOneBy({ email:emailTrimmed });;
+  
   if (!existingUser) {
-    console.log("in isUserExist");
-    return res.status(403).json({ message: "Invalid email or password!" });
+    return res.status(403).json({ message: "User dose not exist" });
   }
 
+  if (existingUser.password !== password) {
+    return res.status(404).json({message: 'Invalid Username or Password!'})
+  }
 
-
+  const SECRET_KEY = process.env.JWT_SECRET_KEY|| 'hello this is SECRET_KEY';
+  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '5h' });
+  res.json({token})
+  
 }
