@@ -2,6 +2,7 @@ import express from "express";
 // import logger from "morgan";
 import * as path from "path";
 import cors from 'cors';
+import bodyParser from "body-parser";
 import './config/dotenv';
 import "reflect-metadata";
 
@@ -39,6 +40,7 @@ app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true,
 }))
+app.use(bodyParser.json());
 
 // app.use(logger("dev"));
 
