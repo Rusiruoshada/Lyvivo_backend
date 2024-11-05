@@ -7,8 +7,8 @@ router.get("/", controller.index);
 
 router.get("/api/homepageProduct", controller.homepageProduct);
 
-router.get("/api/product/:id", controller.productID);
+router.get("/api/products/:id", controller.productID);
 
 router.post("/api/register", controller.registerUser);
 
-router.post('/api/login', controller.login);
+router.post("/api/login", controller.login);
