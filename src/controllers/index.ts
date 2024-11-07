@@ -3,9 +3,15 @@ import Product from "../mongoDB/models/product";
 import { User } from "../postgres/entity/User";
 import { AppDataSource } from "../postgres/database";
 import bcrypt from "bcryptjs";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import Stripe from "stripe";
 
 import '../config/dotenv';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-10-28.acacia'
+});
+
 /**
  * GET /
  * Home page.
@@ -41,7 +47,7 @@ export const homepageProduct = async (
     res.json(grocery);
   } catch (error) {
     console.error(error);
-    
+
     res.status(500).json({ error: "Internal Server Error!" });
 
   }
@@ -131,4 +137,9 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '5h' });
   res.json({token})
   
+}
+
+export const checkout = async (req: Request, res: Response): Promise<any> => {
+
+
 }
