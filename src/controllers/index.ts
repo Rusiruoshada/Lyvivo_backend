@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 
 import '../config/dotenv';
+import { error } from "console";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-10-28.acacia'
@@ -140,6 +141,23 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 }
 
 export const checkout = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { amount } = req.body; // amount should be passed in cents
 
+    if (typeof amount !== 'number') {
+      return res.status(400).send({ error: 'Amount must be a number' });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: 'usd',
+    })
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    })
+  } catch (error) {
+    console.log('payment error', error);
+    res.status(500).send({ error: 'Internal Server Error'})
+  }
 
 }
