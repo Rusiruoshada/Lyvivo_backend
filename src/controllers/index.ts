@@ -6,11 +6,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 
-import '../config/dotenv';
+import "../config/dotenv";
 import { error } from "console";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-10-28.acacia'
+  apiVersion: "2024-10-28.acacia",
 });
 
 /**
@@ -50,7 +50,6 @@ export const homepageProduct = async (
     console.error(error);
 
     res.status(500).json({ error: "Internal Server Error!" });
-
   }
 };
 
@@ -85,8 +84,8 @@ export const registerUser = async (
   const trimmedEmail = email.trim().toLowerCase();
 
   const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email:trimmedEmail });
-  
+  const existingUser = await userRepository.findOneBy({ email: trimmedEmail });
+
   if (existingUser) {
     return res.status(403).json({ message: "User already exists." });
   }
@@ -107,7 +106,7 @@ export const registerUser = async (
     password: hashedPassword,
   });
 
-  try {   
+  try {
     await userRepository.save(user);
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
@@ -117,48 +116,55 @@ export const registerUser = async (
 };
 
 export const login = async (req: Request, res: Response): Promise<any> => {
-  const {username:email, password} = req.body;
+  const { username: email, password } = req.body;
 
   const emailTrimmed = email.trim().toLowerCase();
 
   const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email:emailTrimmed });;
-  
+  const existingUser = await userRepository.findOneBy({ email: emailTrimmed });
+
   if (!existingUser) {
     return res.status(403).json({ message: "User dose not exist" });
   }
 
-  const hashPasswordCompare = await bcrypt.compare(password,existingUser.password)
+  const hashPasswordCompare = await bcrypt.compare(
+    password,
+    existingUser.password
+  );
 
   if (!hashPasswordCompare) {
-    return res.status(404).json({message: 'Invalid Username or Password!'})
+    return res.status(404).json({ message: "Invalid Username or Password!" });
   }
 
-  const SECRET_KEY = process.env.JWT_SECRET_KEY|| 'hello this is SECRET_KEY';
-  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '5h' });
-  res.json({token})
-  
-}
+  const SECRET_KEY = process.env.JWT_SECRET_KEY || "hello this is SECRET_KEY";
+  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "5h" });
+  res.json({ token });
+};
 
 export const checkout = async (req: Request, res: Response): Promise<any> => {
   try {
     const { amount } = req.body; // amount should be passed in cents
+    parseFloat(amount);
+    const amountInCents = Math.round(amount * 1000);
 
-    if (typeof amount !== 'number') {
-      return res.status(400).send({ error: 'Amount must be a number' });
+    if (amountInCents < 0) {
+      return res.status(400).send({
+        message: "error form checkout amount is not a number",
+        error: "Amount must be a number",
+      });
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
-      currency: 'usd',
-      automatic_payment_methods: {enabled: true},
-    })
+      amount: amountInCents,
+      currency: "usd",
+      automatic_payment_methods: { enabled: true },
+    });
+    console.log(paymentIntent);
     res.send({
       clientSecret: paymentIntent.client_secret,
-    })
+    });
   } catch (error) {
-    console.log('payment error', error);
-    res.status(500).send({ error: 'Internal Server Error'})
+    console.log("payment error", error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
-
-}
+};
