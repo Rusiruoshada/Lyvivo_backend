@@ -147,10 +147,10 @@ export const checkout = async (req: Request, res: Response): Promise<any> => {
     parseFloat(amount);
     const amountInCents = Math.round(amount * 1000);
 
-    if (amountInCents < 0) {
+    if (amountInCents <= 0) {
       return res.status(400).send({
-        message: "error form checkout amount is not a number",
-        error: "Amount must be a number",
+        message: "Add some items to checkout!",
+        error: "Amount must be a number and can't be zero!",
       });
     }
 
