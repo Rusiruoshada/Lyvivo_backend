@@ -16,7 +16,6 @@ export const authenticateJWT = (
   jwt.verify(token, JWT_SECRET_KEY, (err, user) => {
     if (err) return res.sendStatus(403);
     req.body = user; // ask req.user why its not working
-
     next();
   });
 };
