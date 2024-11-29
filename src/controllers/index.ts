@@ -13,10 +13,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-10-28.acacia",
 });
 
-/**
- * GET /
- * Home page.
- */
 export const index = async (req: Request, res: Response): Promise<void> => {
   res.render("index", { title: "Express" });
 };
