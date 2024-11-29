@@ -159,8 +159,7 @@ export const checkout = async (req: Request, res: Response): Promise<any> => {
       currency: "usd",
       automatic_payment_methods: { enabled: true },
     });
-    console.log(paymentIntent);
-    
+
     res.send({
 
       clientSecret: paymentIntent.client_secret,
