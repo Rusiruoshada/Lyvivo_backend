@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 
 import "../config/dotenv";
-import { error } from "console";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-10-28.acacia",
