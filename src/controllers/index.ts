@@ -3,13 +3,19 @@ import Product from "../mongoDB/models/product";
 import { User } from "../postgres/entity/User";
 import { AppDataSource } from "../postgres/database";
 import bcrypt from "bcryptjs";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import Stripe from "stripe";
+import nodemailer from "nodemailer";
+import "../config/dotenv";
 
-import '../config/dotenv';
-/**
- * GET /
- * Home page.
- */
+//const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+ // apiVersion: "2024-10-28.acacia",
+//});
+
+const stripe = require("stripe")(
+  process.env.STRIPE_SECRET_KEY! // check if the env is working
+);
+
 export const index = async (req: Request, res: Response): Promise<void> => {
   res.render("index", { title: "Express" });
 };
@@ -41,9 +47,8 @@ export const homepageProduct = async (
     res.json(grocery);
   } catch (error) {
     console.error(error);
-    
-    res.status(500).json({ error: "Internal Server Error!" });
 
+    res.status(500).json({ error: "Internal Server Error!" });
   }
 };
 
@@ -62,73 +67,50 @@ export const productID = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-export const registerUser = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const {
-    firstName,
-    lastName,
-    email,
-    mobileNumber,
-    password,
-    confirmPassword,
-  } = req.body;
 
-  const trimmedEmail = email.trim().toLowerCase();
 
-  const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email:trimmedEmail });
-  
-  if (existingUser) {
-    return res.status(403).json({ message: "User already exists." });
-  }
+export const checkout = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { amount } = req.body; // amount should be passed in cents
+    parseFloat(amount);
+    const amountInCents = Math.round(amount * 1000);
 
-  if (password !== confirmPassword) {
-    return res
-      .status(404)
-      .json({ message: "Your confirm password is don't match" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = userRepository.create({
-    firstName,
-    lastName,
-    email,
-    mobileNumber,
-    password: hashedPassword,
-  });
-
-  try {   
-    await userRepository.save(user);
-    res.status(201).json({ message: "User registered successfully!" });
+    if (amountInCents <= 0) {
+      return res.status(400).send({
+        message: "Add some items to checkout!",
+        error: "Amount must be a number and can't be zero!",
+      });
+    }
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountInCents*0.1,
+      currency: "usd",
+      automatic_payment_methods: { enabled: true },
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+    
   } catch (error) {
-    console.error("Error saving user:", error);
-    res.status(500).json({ message: "Error saving user" });
+    console.log("payment error", error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
-export const login = async (req: Request, res: Response): Promise<any> => {
-  const {username:email, password} = req.body;
 
-  const emailTrimmed = email.trim().toLowerCase();
 
-  const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email:emailTrimmed });;
-  
-  if (!existingUser) {
-    return res.status(403).json({ message: "User dose not exist" });
-  }
+// export const getAllProductData = async (req: Request, res: Response): Promise<any> => {
+//   try {
+//     const data = await Product.find()
+//     res.json(data);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// }
 
-  const hashPasswordCompare = await bcrypt.compare(password,existingUser.password)
+// // use aws and modify this
+// export const addNewProduct = async (req: Request, res: Response): Promise<any> => {
+//   console.log(req.body)
+//   console.log('hit the upload');
+// }
 
-  if (!hashPasswordCompare) {
-    return res.status(404).json({message: 'Invalid Username or Password!'})
-  }
-
-  const SECRET_KEY = process.env.JWT_SECRET_KEY|| 'hello this is SECRET_KEY';
-  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '5h' });
-  res.json({token})
-  
-}
