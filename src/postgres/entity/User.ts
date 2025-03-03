@@ -1,10 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { IsEmail, Length } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { IsEmail, Length } from "class-validator";
+
+// Step 1: Define the Enum
+export enum UserType {
+  ADMIN = "admin",
+  USER = "user",
+  SUPER_ADMIN = "super",
+}
 
 @Entity()
-export class User  {
+export class User {
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column({
+    type: "enum",
+    enum: UserType,  // reference the enum
+    default: UserType.USER, // optional, set a default value
+  })
+  type!: UserType ;
 
   @Column()
   @Length(1, 255)
