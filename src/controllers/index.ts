@@ -5,12 +5,16 @@ import { AppDataSource } from "../postgres/database";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
-
+import nodemailer from "nodemailer";
 import "../config/dotenv";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-10-28.acacia",
-});
+//const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+ // apiVersion: "2024-10-28.acacia",
+//});
+
+const stripe = require("stripe")(
+  process.env.STRIPE_SECRET_KEY! // check if the env is working
+);
 
 export const index = async (req: Request, res: Response): Promise<void> => {
   res.render("index", { title: "Express" });
@@ -63,78 +67,7 @@ export const productID = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-export const registerUser = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const {
-    firstName,
-    lastName,
-    email,
-    mobileNumber,
-    password,
-    confirmPassword,
-  } = req.body;
 
-  const trimmedEmail = email.trim().toLowerCase();
-
-  const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email: trimmedEmail });
-
-  if (existingUser) {
-    return res.status(403).json({ message: "User already exists." });
-  }
-
-  if (password !== confirmPassword) {
-    return res
-      .status(404)
-      .json({ message: "Your confirm password is don't match" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = userRepository.create({
-    firstName,
-    lastName,
-    email,
-    mobileNumber,
-    password: hashedPassword,
-  });
-
-  try {
-    await userRepository.save(user);
-    res.status(201).json({ message: "User registered successfully!" });
-  } catch (error) {
-    console.error("Error saving user:", error);
-    res.status(500).json({ message: "Error saving user" });
-  }
-};
-
-export const login = async (req: Request, res: Response): Promise<any> => {
-  const { username: email, password } = req.body;
-
-  const emailTrimmed = email.trim().toLowerCase();
-
-  const userRepository = AppDataSource.getRepository(User);
-  const existingUser = await userRepository.findOneBy({ email: emailTrimmed });
-
-  if (!existingUser) {
-    return res.status(403).json({ message: "User dose not exist" });
-  }
-
-  const hashPasswordCompare = await bcrypt.compare(
-    password,
-    existingUser.password
-  );
-
-  if (!hashPasswordCompare) {
-    return res.status(404).json({ message: "Invalid Username or Password!" });
-  }
-
-  const SECRET_KEY = process.env.JWT_SECRET_KEY || "hello this is SECRET_KEY";
-  const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: "5h" });
-  res.json({ token });
-};
 
 export const checkout = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -148,20 +81,36 @@ export const checkout = async (req: Request, res: Response): Promise<any> => {
         error: "Amount must be a number and can't be zero!",
       });
     }
-
+    
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
+      amount: amountInCents*0.1,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
     });
-
     res.send({
-
       clientSecret: paymentIntent.client_secret,
-
     });
+    
   } catch (error) {
     console.log("payment error", error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+
+
+// export const getAllProductData = async (req: Request, res: Response): Promise<any> => {
+//   try {
+//     const data = await Product.find()
+//     res.json(data);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// }
+
+// // use aws and modify this
+// export const addNewProduct = async (req: Request, res: Response): Promise<any> => {
+//   console.log(req.body)
+//   console.log('hit the upload');
+// }
+
