@@ -5,7 +5,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "typeorm:run-migrations": "npx typeorm-ts-node-commonjs migration:run  -d src/postgres/database.ts",
+    "typeorm:create-migration": "npx typeorm migration:create src/postgres/migrations",
+    "typeorm:generate-migration": "npx ts-node  node_modules/typeorm/cli.js migration:generate -d ./src/postgres/database.ts src/postgres/migrations/"
   },
   "keywords": [],
   "author": "ROMs",
