@@ -8,7 +8,7 @@ export enum UserType {
   SUPER_ADMIN = "super",
 }
 
-@Entity()
+@Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
