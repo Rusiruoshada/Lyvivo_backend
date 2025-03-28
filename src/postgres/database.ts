@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
     synchronize: false,
     logging: true,
     migrations: ["src/postgres/migrations/*.ts"],
-    migrationsRun: false,
+    // migrationsRun: false,
     migrationsTableName: 'lyvivo_migration_table',
     entities: [User]
 })
